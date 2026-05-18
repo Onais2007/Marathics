@@ -522,13 +522,22 @@ function renderLatexStr(el,txt){
   }
 }
 
+function getQTitle(p){
+  var title=(lang==='ar'?(p.tAr||p.tEn):(p.tEn||p.tAr))||'';
+  if(!title.trim()){
+    /* Fall back to first line of question text */
+    var q=(p.qAr||p.qEn||'').trim();
+    title=q.split('\n')[0].slice(0,60)+(q.length>60?'…':'');
+  }
+  return title||t('سؤال رقم '+num,'Question '+num);
+}
 function buildQCard(p,subs,num){
   const sub=subs[p.id];const ok=sub&&sub.ok;const att=!!sub;
   const dc=p.diff===1?'d1':p.diff===2?'d2':'d3';
   const dl=p.diff===1?t('\u2b50 \u0633\u0647\u0644','\u2b50 Easy'):p.diff===2?t('\u2b50\u2b50 \u0645\u062a\u0648\u0633\u0637','\u2b50\u2b50 Med'):t('\u2b50\u2b50\u2b50 \u0635\u0639\u0628','\u2b50\u2b50\u2b50 Hard');
   const card=document.createElement('div');card.className='qcard'+(ok?' solved':att&&!ok?' wrong':'');card.id='qc-'+p.id;
   const head=document.createElement('div');head.className='qhead';
-  head.innerHTML='<div class="qnum">'+num+'</div><div class="qtitle">'+escH((lang==='ar'?(p.tAr||p.tEn):(p.tEn||p.tAr))||'')+'</div><div class="qmeta"><span class="dbadge '+dc+'">'+dl+'</span><span class="qstatus">'+(ok?'\u2705':att?'\u274c':'\u25cb')+'</span><span class="qchev">\u25bc</span></div>';
+  head.innerHTML='<div class="qnum">'+num+'</div><div class="qtitle">'+escH(getQTitle(p))+'</div><div class="qmeta"><span class="dbadge '+dc+'">'+dl+'</span><span class="qstatus">'+(ok?'\u2705':att?'\u274c':'\u25cb')+'</span><span class="qchev">\u25bc</span></div>';
   head.addEventListener('click',()=>card.classList.toggle('open'));card.appendChild(head);
   const body=document.createElement('div');body.className='qbody';
   const qt=document.createElement('div');qt.className='qtext';var fullText=(lang==='ar'?(p.qAr||p.qEn):(p.qEn||p.qAr))||'';
@@ -878,6 +887,7 @@ function rebuildProblemList(container,WS){
     var numEl=document.createElement('span');numEl.className='pi-num';numEl.textContent=(i+1);
     var titleEl=document.createElement('span');titleEl.className='pi-title';
     var piTxt=(lang==='ar'?(p.tAr||p.tEn):(p.tEn||p.tAr))||'';
+    if(!piTxt.trim()){var qfb=(p.qAr||p.qEn||'').trim();piTxt=qfb.split('\n')[0]}
     titleEl.textContent=piTxt.slice(0,52)+(piTxt.length>52?'…':'');
     var typeEl=document.createElement('span');typeEl.className='pi-type';typeEl.textContent=p.type;
     item.appendChild(handle);item.appendChild(numEl);item.appendChild(titleEl);item.appendChild(typeEl);
